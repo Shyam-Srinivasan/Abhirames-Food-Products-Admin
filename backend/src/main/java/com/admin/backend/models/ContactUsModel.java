@@ -8,23 +8,25 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "Categories")
-public class CategoriesModel {
+@Table(name = "ContactUs")
+public class ContactUsModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "category_id")
-    @JsonProperty("category_id")
-    private Long categoryId;
-    
+    @Column(name = "contact_us_id")
+    private Long contactUsId;
 
-    @Column(name = "category_name")
-    @JsonProperty("category_name")
-    private String categoryName;
+    @Column(name = "phone_number")
+    @JsonProperty("phone_number")
+    private String phoneNumber;
+
+    @Column(name = "email_id")
+    @JsonProperty("email_id")
+    private String emailId;
     
-    @Column(name = "is_active")
-    @JsonProperty("is_active")
-    private boolean isActive;
-    
+    @Column(name = "address")
+    @JsonProperty("address")
+    private String address;
+
     @Column(name = "created_at")
     @JsonProperty("created_at")
     private LocalDateTime createdAt;
@@ -32,4 +34,5 @@ public class CategoriesModel {
     @Column(name = "updated_at")
     @JsonProperty("updated_at")
     private LocalDateTime updatedAt;
+
 }
