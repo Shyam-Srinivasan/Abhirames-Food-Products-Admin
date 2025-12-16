@@ -13,27 +13,35 @@ public class AdminUsersService {
     @Autowired
     private AdminUsersRepository adminUsersRepository;
     
-    public AdminUsersModel findAdminUserById(Long adminId){
-        return adminUsersRepository.findByUserId(adminId);
-    }
-
-    public AdminUsersModel findAdminUserByUsername(String username){
-        return adminUsersRepository.findByUsername(username);
-    }
-
-    public AdminUsersModel findAdminUserByEmail(String email){
-        return adminUsersRepository.findByEmail(email);
+    public AdminUsersModel createAdminUser(AdminUsersModel adminUsersModel){
+        return adminUsersRepository.save(adminUsersModel);
     }
     
-    public List<AdminUsersModel> findAdminUserByRole(String role) {
+    public AdminUsersModel fetchAdminUserByAdminId(Long adminId){
+        return adminUsersRepository.findByAdminId(adminId);
+    }
+
+    public AdminUsersModel fetchAdminUserByUsername(String username){
+        return adminUsersRepository.findByUsername(username);
+    }
+    
+    public List<AdminUsersModel> fetchAdminUsersByRole(String role) {
         return adminUsersRepository.findAllByRole(role);
     }
     
-    public List<AdminUsersModel> findAdminUserByCreatedAtAfter(LocalDateTime createdAtAfter){
+    public List<AdminUsersModel> fetchAdminUserByCreatedAtAfter(LocalDateTime createdAtAfter){
         return adminUsersRepository.findAllByCreatedAtAfter(createdAtAfter);
     }
     
-    public List<AdminUsersModel> findAdminUserByCreatedAtBefore(LocalDateTime createdAtBefore){
+    public List<AdminUsersModel> fetchAdminUserByCreatedAtBefore(LocalDateTime createdAtBefore){
         return adminUsersRepository.findAllByCreatedAtBefore(createdAtBefore);
+    }
+    
+    public AdminUsersModel updateAdminUser(AdminUsersModel adminUsersModel){
+        return adminUsersRepository.save(adminUsersModel);
+    }
+    
+    public void deleteAdminUser(Long adminId){
+        adminUsersRepository.deleteById(adminId);
     }
 }

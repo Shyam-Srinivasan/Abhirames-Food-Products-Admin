@@ -27,8 +27,7 @@ public class AdminUsersModel {
     @Column(name = "role")
     @JsonProperty("role")
     private String role;
-
-
+    
     @JsonProperty("created_at")
     @Column(name = "created_at")
     private LocalDateTime createdAt;

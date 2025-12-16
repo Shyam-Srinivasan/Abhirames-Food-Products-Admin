@@ -8,8 +8,7 @@ import java.util.List;
 
 public interface AdminUsersRepository extends JpaRepository<AdminUsersModel, Long> {
     AdminUsersModel findByUsername(String username);
-    AdminUsersModel findByEmail(String email);
-    AdminUsersModel findByUserId(Long userId);
+    AdminUsersModel findByAdminId(Long adminId);
     List<AdminUsersModel> findAllByRole(String role);
     List<AdminUsersModel> findAllByCreatedAtAfter(LocalDateTime createdAtAfter);
     List<AdminUsersModel> findAllByCreatedAtBefore(LocalDateTime createdAtBefore);

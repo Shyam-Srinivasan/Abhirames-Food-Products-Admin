@@ -11,6 +11,9 @@ public class AboutUsService {
     private AboutUsRepository aboutUsRepository;
     
     public AboutUsModel fetchAboutUs(){
+        if (aboutUsRepository.findAll().isEmpty()){
+            return null;
+        }
         return aboutUsRepository.findAll().getFirst();
     }
     
@@ -22,7 +25,7 @@ public class AboutUsService {
         return aboutUsRepository.save(aboutUs);
     }
 
-    public void deleteAboutUs(Long aboutUsId){
-        aboutUsRepository.deleteById(aboutUsId);
+    public void deleteAboutUs(){
+        aboutUsRepository.deleteAll();
     }
 }

@@ -18,7 +18,7 @@ public class ProductService {
     }
     
     public List<ProductsModel> fetchProductsByCategoryId(Long categoryId){
-        return productRepository.findByCategoryId(categoryId);
+        return productRepository.findAllByCategoryId(categoryId);
     }
     
     public ProductsModel fetchProduct(Long productId){
@@ -29,6 +29,9 @@ public class ProductService {
         return productRepository.findByProductName(productName);
     }
 
+    public List<ProductsModel> fetchProductByAvailability(boolean isAvailable){
+        return productRepository.findAllByIsAvailable(isAvailable);
+    }
     public ProductsModel createProduct(ProductsModel product){
         return productRepository.save(product);
     }

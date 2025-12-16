@@ -11,16 +11,19 @@ public class ReturnAndRefundService {
     @Autowired
     private ReturnAndRefundRepository returnAndRefundRepository;
     
-    public String fetchReturnAndRefundPolicy(){
-        return returnAndRefundRepository.findAll().getFirst().getDescription();
+    public ReturnAndRefundModel fetchReturnAndRefundPolicy(){
+        if (returnAndRefundRepository.findAll().isEmpty()){
+            return null;
+        }
+        return returnAndRefundRepository.findAll().getFirst();
     }
     
-    public void createReturnAndRefundPolicy(ReturnAndRefundModel returnAndRefundModel){
-        returnAndRefundRepository.save(returnAndRefundModel);
+    public ReturnAndRefundModel createReturnAndRefundPolicy(ReturnAndRefundModel returnAndRefundModel){
+        return returnAndRefundRepository.save(returnAndRefundModel);
     }
     
-    public void updateReturnAndRefundPolicy(ReturnAndRefundModel returnAndRefundModel){
-        returnAndRefundRepository.save(returnAndRefundModel);
+    public ReturnAndRefundModel updateReturnAndRefundPolicy(ReturnAndRefundModel returnAndRefundModel){
+        return returnAndRefundRepository.save(returnAndRefundModel);
     }
     
     public void deleteReturnAndRefundPolicy(){

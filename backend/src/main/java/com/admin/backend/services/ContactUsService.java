@@ -12,6 +12,9 @@ public class ContactUsService {
     private ContactUsRepository contactUsRepository;
     
     public ContactUsModel fetchContactUs(){
+        if (contactUsRepository.findAll().isEmpty()){
+            return null;
+        }
         return contactUsRepository.findAll().getFirst();
     }
     
