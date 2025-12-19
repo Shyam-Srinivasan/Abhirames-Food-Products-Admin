@@ -1,53 +1,113 @@
 package com.admin.backend.services;
 
+import com.admin.backend.exceptions.ResourceConflictException;
+import com.admin.backend.exceptions.ResourceNotFoundException;
 import com.admin.backend.models.CategoriesModel;
 import com.admin.backend.repositories.CategoriesRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @Transactional
 public class CategoriesService {
+    
+    
     @Autowired
     private CategoriesRepository categoriesRepository;
+
+    public CategoriesModel createCategory(CategoriesModel categoryModel){
+        if(categoriesRepository.findByCategoryName(categoryModel.getCategoryName()) != null){
+            throw new ResourceConflictException("Category already exists with name: " + categoryModel.getCategoryName());
+        }
+        return categoriesRepository.save(categoryModel);
+    }
     
     public List<CategoriesModel> fetchCategories(){
         return categoriesRepository.findAll();
     }
     
     public CategoriesModel fetchCategoryById(Long categoryId){
-        return categoriesRepository.findByCategoryId(categoryId);
+        if(categoryId == null){
+            throw new IllegalArgumentException("Category id cannot be empty.");
+        }
+        CategoriesModel category = categoriesRepository.findByCategoryId(categoryId);
+        if (category == null){
+            throw new ResourceNotFoundException("Category not found with id: " + categoryId + ".");
+        }
+        return category;
     }
     
     public CategoriesModel fetchCategoryByName(String categoryName){
-        return categoriesRepository.findByCategoryName(categoryName);
+        if(categoryName == null){
+            throw new IllegalArgumentException("Category name cannot be empty.");
+        }
+        CategoriesModel category = categoriesRepository.findByCategoryName(categoryName);
+        if (category == null){
+            throw new ResourceNotFoundException(categoryName + " not found!");
+        }
+        return category;
     }
     
-    public List<CategoriesModel> fetchCategoriesByActiveStatus(boolean isActive){
-        return categoriesRepository.findAllByIsActive(isActive);
+    public List<CategoriesModel> fetchCategoriesByActiveStatus(Boolean isActive){
+        List<CategoriesModel> category = categoriesRepository.findAllByIsActive(isActive);
+        if (category == null){
+            throw new ResourceNotFoundException("No category found under " + (isActive ? "active" : "inactive") + " status.");
+        }
+        return category;
     }
     
-    public List<CategoriesModel> fetchCategoriesCreatedAfter(LocalDateTime createdAtAfter){
-        return categoriesRepository.findAllByCreatedAtAfter(createdAtAfter);
+    public List<CategoriesModel> fetchCategoriesCreatedAfter(LocalDateTime createdAfter){
+        if (createdAfter == null){
+            throw new IllegalArgumentException("Created after date cannot be empty.");
+        }
+        List<CategoriesModel> category = categoriesRepository.findAllByCreatedAtAfter(createdAfter);
+        if (category == null){
+            throw new ResourceNotFoundException("No category found for the given date.");
+        }
+        return category;
     }
     
-    public List<CategoriesModel> fetchCategoriesUpdatedAfter(LocalDateTime updatedAtBefore){
-        return categoriesRepository.findAllByUpdatedAtAfter(updatedAtBefore);
-    }
-    
-    public CategoriesModel createCategory(CategoriesModel category){
-        return categoriesRepository.save(category);
+    public List<CategoriesModel> fetchCategoriesUpdatedAfter(LocalDateTime updatedAfter){
+        if (updatedAfter == null){
+            throw new IllegalArgumentException("Updated after date cannot be empty.");
+        }
+        List<CategoriesModel> category = categoriesRepository.findAllByUpdatedAtAfter(updatedAfter);
+        if (category == null){
+            throw new ResourceNotFoundException("No category found for the given date.");
+        }
+        return category;
     }
 
-    public CategoriesModel updateCategory(CategoriesModel category){
-        return categoriesRepository.save(category);
+    public CategoriesModel updateCategory(Long id, CategoriesModel updatedCategory){
+        if(updatedCategory == null || updatedCategory.getCategoryName() == null){
+            throw new IllegalArgumentException("Category name cannot be empty.");
+        }
+        CategoriesModel existingCategory = fetchCategoryById(id);
+        if (existingCategory == null){
+            throw new ResourceNotFoundException("Category not found with id: " + id);
+        }
+
+        existingCategory.setCategoryName(updatedCategory.getCategoryName());
+        existingCategory.setActive(updatedCategory.isActive());
+        existingCategory.setUpdatedAt(LocalDateTime.now());
+        
+        return categoriesRepository.save(existingCategory);
     }
     
-    public void deleteCategory(Long categoryId){
+    public String deleteCategory(Long categoryId){
+        if (categoryId == null){
+            throw new IllegalArgumentException("Category id cannot be empty.");
+        }
+        CategoriesModel existingCategory = fetchCategoryById(categoryId);
+        if (existingCategory == null){
+            throw new ResourceNotFoundException("Category not found with id: " + categoryId);
+        }
+        String categoryName = existingCategory.getCategoryName();
         categoriesRepository.deleteById(categoryId);
+        
+        return categoryName;
     }
 }

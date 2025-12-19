@@ -1,8 +1,11 @@
 package com.admin.backend.services;
 
+import com.admin.backend.exceptions.ResourceConflictException;
+import com.admin.backend.exceptions.ResourceNotFoundException;
 import com.admin.backend.models.AdminUsersModel;
 import com.admin.backend.repositories.AdminUsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -10,38 +13,98 @@ import java.util.List;
 
 @Service
 public class AdminUsersService {
+    
     @Autowired
     private AdminUsersRepository adminUsersRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     
-    public AdminUsersModel createAdminUser(AdminUsersModel adminUsersModel){
+    
+    public AdminUsersModel createAdminUser(AdminUsersModel adminUsersModel){        
+        if (existsByUsername(adminUsersModel.getUsername())){
+            throw new ResourceConflictException(adminUsersModel.getUsername() + " user already exists.");
+        }  
+        adminUsersModel.setPassword(passwordEncoder.encode(adminUsersModel.getPassword()));
+        
         return adminUsersRepository.save(adminUsersModel);
     }
     
     public AdminUsersModel fetchAdminUserByAdminId(Long adminId){
-        return adminUsersRepository.findByAdminId(adminId);
+        return adminUsersRepository.findById(adminId)
+                .orElseThrow( () -> new ResourceNotFoundException("Admin user not found with id: " + adminId + "."));
     }
 
     public AdminUsersModel fetchAdminUserByUsername(String username){
-        return adminUsersRepository.findByUsername(username);
+        AdminUsersModel user = adminUsersRepository.findByUsername(username);
+        if (user == null){
+            throw new ResourceNotFoundException("Admin user not found with username: " + username + ".");
+        }
+        return user;
     }
     
     public List<AdminUsersModel> fetchAdminUsersByRole(String role) {
-        return adminUsersRepository.findAllByRole(role);
+        List<AdminUsersModel> adminUsers = adminUsersRepository.findAllByRole(role);
+        if (adminUsers == null || adminUsers.isEmpty()){
+            throw new ResourceNotFoundException("Admin user not found with role: " + role + ".");
+        }
+        return adminUsers;
     }
     
     public List<AdminUsersModel> fetchAdminUserByCreatedAtAfter(LocalDateTime createdAtAfter){
-        return adminUsersRepository.findAllByCreatedAtAfter(createdAtAfter);
+        if (createdAtAfter == null){
+            throw new IllegalArgumentException("Created after date cannot be empty.");
+        }
+        List<AdminUsersModel> adminUsers = adminUsersRepository.findAllByCreatedAtAfter(createdAtAfter);
+        if (adminUsers == null || adminUsers.isEmpty()){
+            throw new ResourceNotFoundException("No admin user found for the given date " + createdAtAfter + ".");
+        }
+        return adminUsers;
     }
     
     public List<AdminUsersModel> fetchAdminUserByCreatedAtBefore(LocalDateTime createdAtBefore){
-        return adminUsersRepository.findAllByCreatedAtBefore(createdAtBefore);
+        if (createdAtBefore == null){
+            throw new IllegalArgumentException("Created before date cannot be empty.");
+        }
+        List<AdminUsersModel> adminUsers = adminUsersRepository.findAllByCreatedAtBefore(createdAtBefore);
+        if (adminUsers == null || adminUsers.isEmpty()){
+            throw new ResourceNotFoundException("No admin user found for the given date " + createdAtBefore + ".");
+        }
+        return adminUsers;
     }
     
-    public AdminUsersModel updateAdminUser(AdminUsersModel adminUsersModel){
-        return adminUsersRepository.save(adminUsersModel);
+    public boolean existsByUsername(String userName){
+        return adminUsersRepository.existsByUsername(userName);
     }
     
-    public void deleteAdminUser(Long adminId){
+    public AdminUsersModel updateAdminUser(Long adminId, AdminUsersModel updatedAdminUserModel){
+        if (updatedAdminUserModel == null || updatedAdminUserModel.getUsername() == null || updatedAdminUserModel.getPassword() == null || updatedAdminUserModel.getRole() == null || adminId == null){
+            throw new IllegalArgumentException("one or more fields are empty.");
+        }
+
+        AdminUsersModel existingAdminUserModel = fetchAdminUserByAdminId(adminId);
+        if (existingAdminUserModel == null){
+            throw new ResourceNotFoundException("Admin user not found with id: " + adminId + ".");
+        }
+
+        existingAdminUserModel.setUsername(updatedAdminUserModel.getUsername());
+        existingAdminUserModel.setPassword(updatedAdminUserModel.getPassword());
+        existingAdminUserModel.setRole(updatedAdminUserModel.getRole());
+
+        return adminUsersRepository.save(existingAdminUserModel);
+    }
+    
+    public String deleteAdminUser(Long adminId){
+        if (adminId == null){
+            throw new IllegalArgumentException("Admin id cannot be empty.");
+        }
+        
+        AdminUsersModel adminUsersModel = fetchAdminUserByAdminId(adminId);
+        if (adminUsersModel == null){
+            throw new ResourceNotFoundException("Admin user not found with id: " + adminId + ".");
+        }
+        
+        String username = adminUsersModel.getUsername();
         adminUsersRepository.deleteById(adminId);
+        return username;
     }
 }
